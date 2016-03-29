@@ -76,7 +76,7 @@ function createCube () {
       model: regl.prop('model'),
       view: regl.prop('view')
     },
-    depthTest: true
+    //depthTest: true
   })
   return function (count, opts) {
     camera(mat4.identity(model))
