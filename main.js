@@ -4,13 +4,15 @@ var cubeMesh = require('cube-mesh')
 var mesh = cubeMesh(1)
 
 var cubes = []
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 80; i++) {
   cubes.push(createCube())
 }
 
 var proj = mat4.identity([])
-var view = mat4.identity([])
-mat4.translate(view, view, [0,0,-5])
+
+function camera (model) {
+  return mat4.translate(model, model, [0,0,-5])
+}
 
 regl.frame(function (count) {
   regl.clear({
@@ -19,10 +21,9 @@ regl.frame(function (count) {
   })
   var opts = {
     proj: mat4.perspective(proj, Math.PI/2,
-      window.innerWidth/window.innerHeight, 0, 1e12),
-    view: view
+      window.innerWidth/window.innerHeight, 0, 1e12)
   }
-  for (var i = 0; i < cubes.length; i++) cubes[i](opts)
+  for (var i = 0; i < cubes.length; i++) cubes[i](count, opts)
 })
 
 function createCube () {
@@ -31,11 +32,10 @@ function createCube () {
     1/(2*Math.random()-1),
     1/(2*Math.random()-1)
   ]
-  var rotY = 0.01/Math.random() * 0.01
-  var rotX = 0.01/Math.random() * 0.01
-
+  var rotX = 0.01/Math.random() * 0.1
+  var rotY = 0.01/Math.random() * 0.1
   var model = mat4.identity([])
-  mat4.translate(model, model, pos)
+  var view = mat4.identity([])
 
   var draw = regl({
     frag: `
@@ -74,10 +74,16 @@ function createCube () {
     },
     depthTest: true
   })
-  return function (opts) {
-    mat4.rotateX(model, model, rotX)
-    mat4.rotateY(model, model, rotY)
+  return function (count, opts) {
+    camera(mat4.identity(model))
+    mat4.translate(model, model, pos)
+
+    mat4.identity(view)
+    mat4.rotateX(view, view, rotX*count)
+    mat4.rotateY(view, view, rotY*count)
+
     opts.model = model
+    opts.view = view
     return draw(opts)
   }
 }
