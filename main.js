@@ -11,7 +11,7 @@ for (var i = 0; i < 80; i++) {
 var proj = mat4.identity([])
 
 function camera (model) {
-  return mat4.translate(model, model, [0,0,-5])
+  return mat4.translate(model, model, [0,0,0])
 }
 
 regl.frame(function (count) {
@@ -32,8 +32,12 @@ function createCube () {
     1/(2*Math.random()-1),
     1/(2*Math.random()-1)
   ]
-  var rotX = 0.01/Math.random() * 0.1
-  var rotY = 0.01/Math.random() * 0.1
+  var rotx = Math.random() * 0.04
+  var roty = Math.random() * 0.04
+
+  var orbitx = Math.random() * 0.01
+  var orbity = Math.random() * 0.01
+
   var model = mat4.identity([])
   var view = mat4.identity([])
 
@@ -76,11 +80,15 @@ function createCube () {
   })
   return function (count, opts) {
     camera(mat4.identity(model))
+    // orbit:
+    mat4.rotateX(model, model, orbitx*count)
+    mat4.rotateY(model, model, orbity*count)
+
     mat4.translate(model, model, pos)
 
     mat4.identity(view)
-    mat4.rotateX(view, view, rotX*count)
-    mat4.rotateY(view, view, rotY*count)
+    mat4.rotateX(view, view, rotx*count)
+    mat4.rotateY(view, view, roty*count)
 
     opts.model = model
     opts.view = view
