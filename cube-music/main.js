@@ -1,7 +1,16 @@
 var regl = require('regl')()
 var mat4 = require('gl-mat4')
 var cubeMesh = require('cube-mesh')
+var webaudio = require('webaudio')
 var mesh = cubeMesh(1)
+
+var song = require('./song.js')
+var time = 0
+var b = webaudio(function (t) {
+  time = t
+  return song(t)
+})
+b.play()
 
 var cubes0 = []
 for (var i = 0; i < 80; i++) cubes0.push(createCube())
@@ -25,7 +34,7 @@ regl.frame(function (count) {
     proj: mat4.perspective(proj, Math.PI/2,
       window.innerWidth/window.innerHeight, 0, 1e12)
   }
-  var cubes = Date.now()/1000 * bpm % 2 < 1 ? cubes0 : cubes1
+  var cubes = time * bpm % 2 < 1 ? cubes0 : cubes1
   for (var i = 0; i < cubes.length; i++) cubes[i](count, opts)
 })
 

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "cube-mesh": "0.0.4",
+    "gl-mat4": "^1.1.4",
+    "regl": "git://github.com/mikolalysenko/regl.git",
+    "webaudio": "^2.0.0"
+  }
+}
