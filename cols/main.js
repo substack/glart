@@ -1,6 +1,4 @@
-var mesh0 = require('./data/0.json')
-var mesh1 = require('./data/1.json')
-
+var column = require('column-mesh')
 var regl = require('regl')()
 var normals = require('angle-normals')
 var camera = require('regl-camera')(regl, { center: [25,0,0] })
@@ -8,21 +6,20 @@ var mat4 = require('gl-mat4')
 var vec3 = require('gl-vec3')
 var mat0 = [], v0 = []
 
-var col0 = fromMesh(mesh0)
-var col1 = fromMesh(mesh1)
+var mesh = column({ radius: 2, height: 20 })
+var col = fromMesh(mesh)
 
-var batch0 = []
+var batch = []
 for (var i = 0; i < 10; i++) {
-  batch0.push(
+  batch.push(
     { location: [-i*20,0,20] },
     { location: [-i*20,0,-20] }
   )
 }
-var batch1 = []
 for (var i = 0; i < 10; i++) {
-  batch1.push(
-    { location: [-400,12,i*30+60] },
-    { location: [-400,12,-i*30-60] }
+  batch.push(
+    { location: [-400,0,i*30+60] },
+    { location: [-400,0,-i*30-60] }
   )
 }
 
@@ -34,8 +31,7 @@ var pyramid = fromPyramid({
 regl.frame(() => {
   regl.clear({ color: [0,0,0,1] })
   camera(() => {
-    col0(batch0)
-    col1(batch1)
+    col(batch)
     pyramid({ location: [-500,0,0] })
   })
 })
