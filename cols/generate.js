@@ -1,9 +1,9 @@
 var column = require('column-mesh')
 var fs = require('fs')
 var params = [
-  { radius: 2, height: 10, capitalHeight: 0.5, baseHeight: 0.5 },
-  { radius: 3, height: 20, capitalHeight: 2, baseHeight: 2 },
-  { radius: 4, height: 50, capitalHeight: 4, baseHeight: 4 }
+  { radius: 2, height: 20, capitalHeight: 0.5, baseHeight: 0.5 },
+  { radius: 3, height: 40, capitalHeight: 2, baseHeight: 2 },
+  { radius: 4, height: 100, capitalHeight: 4, baseHeight: 4 }
 ]
 
 ;(function next (i) {
