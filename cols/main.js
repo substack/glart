@@ -1,7 +1,11 @@
 var column = require('column-mesh')
 var regl = require('regl')()
 var normals = require('angle-normals')
-var camera = require('regl-camera')(regl, { center: [25,0,0] })
+var camera = require('regl-camera')(regl, {
+  center: [-400,0,0],
+  eye: [0,0,1],
+  distance: 400
+})
 var mat4 = require('gl-mat4')
 var vec3 = require('gl-vec3')
 var mat0 = [], v0 = []
