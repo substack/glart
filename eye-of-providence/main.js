@@ -1,3 +1,8 @@
+var surfaceNets = require('surface-nets')
+var ndarray = require('ndarray')
+var fill = require('ndarray-fill')
+var sphere = require('sphere-mesh')
+
 var regl = require('regl')()
 var camera = require('regl-camera')(regl, {
   center: [0,0,0],
@@ -9,14 +14,70 @@ var normals = require('angle-normals')
 
 var draw = {
   base: base(),
-  top: top()
+  top: top(),
+  eye: eye()
 }
 regl.frame(function () {
   camera(function () {
+    regl.clear({ color: [0,0,0,1], depth: true })
     draw.base()
     draw.top()
+    draw.eye()
   })
 })
+
+function eye () {
+  var mesh = sphere(10,10)
+  var model = [], iview = []
+  return regl({
+    frag: `
+      precision mediump float;
+      varying vec3 pos;
+      varying float ftime;
+      void main () {
+        float x = pos.x/100.0;
+        float y = pos.y/100.0;
+        float z = pos.z/100.0;
+        float v = sin(pow(x*x + y*y + z*z,2.0))
+          * step(0.25,1.0-abs(y)*100.0*pow(sin(sin(ftime*0.1)*5.0),5.0))
+        ;
+        float r = v / sin(x*x+y*y+z*z);
+        gl_FragColor = vec4(r,v,v,1);
+      }
+    `,
+    vert: `
+      precision mediump float;
+      uniform mat4 projection, view, model, iview;
+      uniform float time;
+      varying float ftime;
+      attribute vec3 position;
+      varying vec3 pos;
+      void main () {
+        pos = (iview * vec4(position,1)).xyz;
+        ftime = time;
+        gl_Position = projection * view * model * vec4(position,1);
+      }
+    `,
+    attributes: {
+      position: mesh.positions
+    },
+    uniforms: {
+      model: function (context) {
+        mat4.identity(model)
+        mat4.translate(model, model, [0,57,0])
+        return model
+      },
+      iview: function (context) {
+        mat4.invert(iview, context.view)
+        return context.view
+      },
+      time: function (context) {
+        return context.time
+      }
+    },
+    elements: mesh.cells
+  })
+}
 
 function top () {
   var positions = [
@@ -86,7 +147,7 @@ function base () {
       varying vec3 norm, pos;
       void main () {
         float dy = step(0.5,mod(pos.y/32.0,1.0)) * 3.0;
-        vec3 v = vec3(1,1,1) - (vec3(0.1,0.4,0.5) * (0.0
+        vec3 v = (vec3(0.6,0.4,0.5) * (0.0
           + pow(abs(sin((abs(pos.x*0.5)+dy)*0.25)),1600.0)
           + pow(abs(sin((abs(pos.z*0.5)+dy)*0.25)),1600.0)
           + pow(abs(sin((abs(pos.x*1.0))*0.5)),400.0)
