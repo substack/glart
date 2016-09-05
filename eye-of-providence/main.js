@@ -2,6 +2,8 @@ var surfaceNets = require('surface-nets')
 var ndarray = require('ndarray')
 var fill = require('ndarray-fill')
 var sphere = require('sphere-mesh')
+var fs = require('fs')
+var noise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'))
 
 var regl = require('regl')()
 var camera = require('regl-camera')(regl, {
@@ -100,7 +102,7 @@ function top () {
     frag: `
       precision mediump float;
       void main () {
-        gl_FragColor = vec4(0,1,0,1);
+        gl_FragColor = vec4(0,1,1,1);
       }
     `,
     vert: `
@@ -148,14 +150,18 @@ function base () {
     frag: `
       precision mediump float;
       varying vec3 norm, pos;
+      uniform float time;
+      ${noise}
       void main () {
         float dy = step(0.5,mod(pos.y/32.0,1.0)) * 3.0;
-        vec3 v = (vec3(0.6,0.4,0.5) * (0.0
+        vec3 v = (vec3(0,0.5,1) * (0.0
           + pow(abs(sin((abs(pos.x*0.5)+dy)*0.25)),1600.0)
           + pow(abs(sin((abs(pos.z*0.5)+dy)*0.25)),1600.0)
           + pow(abs(sin((abs(pos.x*1.0))*0.5)),400.0)
           + pow(abs(sin((abs(pos.z*1.0))*0.5)),400.0)
-        ));
+        )) + abs(sin(snoise(vec3(
+          pos.x/32.0, pos.y/32.0-time*0.2, pos.z/32.0
+        ))))*vec3(0,0.5,0.8);
         gl_FragColor = vec4(v,1);
       }
     `,
@@ -179,7 +185,8 @@ function base () {
       model: function (context) {
         mat4.identity(model)
         return model
-      }
+      },
+      time: function (context) { return context.time }
     }
   })
 }

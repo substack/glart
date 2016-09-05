@@ -7,14 +7,14 @@ module.exports = function (regl) {
   return regl({
     frag: `
       precision mediump float;
-      varying vec3 e;
+      varying vec3 e, z;
       ${noise}
       void main () {
         float m = 0.0
-          + pow(snoise(e*64.0),16.0)
-          + pow(snoise(e*48.0),20.0)
-          + pow(snoise(e*32.0),24.0)
-          + pow(snoise(e*24.0),16.0)
+          + pow(snoise(z*64.0),16.0)
+          + pow(snoise(z*48.0),20.0)
+          + pow(snoise(z*32.0),24.0)
+          + pow(snoise(z*8.0),16.0)
         ;
         float y = (0.0
           + pow(abs(sin(snoise(e*0.3))),5.0)
@@ -33,11 +33,12 @@ module.exports = function (regl) {
     vert: `
       precision mediump float;
       attribute vec3 position;
-      varying vec3 e;
+      varying vec3 e, z;
       uniform float aspect, time;
       void main () {
         vec2 uv = position.xy * 2.0 - 1.0;
-        e = (vec4(uv.x*aspect,uv.y,time,1)).xyz * 1.0;
+        z = (vec4(uv.x*aspect,uv.y,1,1)).xyz * 1.0;
+        e = (vec4(uv.x*aspect,uv.y,time*0.2,1)).xyz * 1.0;
         gl_Position = vec4(position,1);
       }
     `,
