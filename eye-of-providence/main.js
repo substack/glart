@@ -11,15 +11,18 @@ var camera = require('regl-camera')(regl, {
 })
 var mat4 = require('gl-mat4')
 var normals = require('angle-normals')
+var bg = require('./bg.js')
 
 var draw = {
   base: base(),
   top: top(),
-  eye: eye()
+  eye: eye(),
+  bg: bg(regl)
 }
 regl.frame(function () {
   camera(function () {
     regl.clear({ color: [0,0,0,1], depth: true })
+    draw.bg()
     draw.base()
     draw.top()
     draw.eye()
