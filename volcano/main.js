@@ -57,9 +57,11 @@ var volcano = regl({
     attribute vec3 position, normal;
     uniform mat4 projection, view, model;
     varying vec3 vnorm;
+    ${noise}
     void main () {
       vnorm = normal;
-      vec3 pos = (position * ${2/size.toFixed(1)})-1.0;
+      vec3 pos = ((position * ${2/size.toFixed(1)})-1.0);
+      pos += snoise(pos)*0.1 + snoise(pos*4.0)*0.02 + snoise(pos*32.0)*0.01;
       gl_Position = projection * view * model * vec4(pos,1);
     }
   `,
