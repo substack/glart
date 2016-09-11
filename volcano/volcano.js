@@ -33,22 +33,28 @@ module.exports = function (regl) {
   return regl({
     frag: `
       precision mediump float;
-      varying vec3 vnorm;
+      varying vec3 vnorm, vpos;
+      ${noise}
       void main () {
-        float n = distance(vnorm, normalize(vec3(0.5,0.8,0.1)))*0.2;
-        gl_FragColor = vec4(vec3(0.2,0.2,0.15)+vec3(n,n,n),1);
+        float n = pow((distance(vnorm, normalize(vec3(0.5,0.8,0.1)))*0.2
+          + snoise(vpos*64.0)*0.1
+          + snoise(vpos*8.0)*0.05
+          + snoise(vpos*16.0)*0.1
+        ) * 3.2, 2.0);
+        gl_FragColor = vec4(vec3(0.2,0.2,0.15)*vec3(n,n,n),1);
       }
     `,
     vert: `
       precision mediump float;
       attribute vec3 position, normal;
       uniform mat4 projection, view, model;
-      varying vec3 vnorm;
+      varying vec3 vnorm, vpos;
       ${noise}
       void main () {
         vnorm = normal;
         vec3 pos = ((position * ${2/size.toFixed(1)})-1.0);
         pos += snoise(pos)*0.1 + snoise(pos*4.0)*0.02 + snoise(pos*32.0)*0.01;
+        vpos = pos;
         gl_Position = projection * view * model * vec4(pos,1);
       }
     `,

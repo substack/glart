@@ -11,5 +11,8 @@
     "regl-camera": "^1.0.0",
     "simplicial-complex": "^1.0.0",
     "surface-nets": "^1.0.2"
+  },
+  "browserify": {
+    "transform": ["brfs"]
   }
 }
