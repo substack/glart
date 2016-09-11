@@ -10,6 +10,7 @@
     "ndarray-fill": "^1.0.1",
     "regl": "^1.1.1",
     "regl-camera": "^1.0.0",
+    "sphere-mesh": "^0.2.2",
     "surface-nets": "^1.0.2"
   },
   "browserify": {
