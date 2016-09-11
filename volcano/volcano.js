@@ -37,10 +37,11 @@ module.exports = function (regl) {
       ${noise}
       void main () {
         float n = pow((distance(vnorm, normalize(vec3(0.5,0.8,0.1)))*0.2
-          + snoise(vpos*64.0)*0.1
-          + snoise(vpos*8.0)*0.05
-          + snoise(vpos*16.0)*0.1
-        ) * 3.2, 2.0);
+          + snoise(vpos*150.0)*0.1
+          + snoise(vpos*64.0)*0.05
+          + snoise(vpos*32.0)*0.1
+          + snoise(vpos*4.0)*0.1
+        ) * 3.2, 2.0)*0.5;
         gl_FragColor = vec4(vec3(0.2,0.2,0.15)*vec3(n,n,n),1);
       }
     `,
@@ -63,8 +64,11 @@ module.exports = function (regl) {
       normal: normals(mesh.cells, mesh.positions)
     },
     uniforms: {
-      model: function () {
-        return mat4.identity(model)
+      model: function (context, params) {
+        mat4.identity(model)
+        mat4.translate(model, model, params.offset)
+        mat4.rotateY(model, model, params.angleY)
+        return model
       }
     },
     elements: mesh.cells
