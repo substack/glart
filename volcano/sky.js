@@ -7,7 +7,7 @@ module.exports = function (regl) {
       precision mediump float;
       varying vec2 uv;
       void main () {
-        gl_FragColor = vec4((uv.x+1.0)*0.5,0.1,(uv.y+1.0)*0.5,1);
+        gl_FragColor = vec4((uv.y+1.0)*0.3+0.1,0.1,(uv.y+1.0)*0.3+0.1,1);
       }
     `,
     vert: `
