@@ -25,7 +25,8 @@ var camera = require('regl-camera')(regl, {
 var draw = {
   candle: candle(regl),
   base: base(regl),
-  flame: flame(regl)
+  flame: flame(regl),
+  wick: wick(regl)
 }
 
 regl.frame(function () {
@@ -33,6 +34,7 @@ regl.frame(function () {
   camera(function () {
     draw.candle()
     draw.base()
+    draw.wick()
     draw.flame()
   })
 })
@@ -157,6 +159,52 @@ function candle (regl) {
     elements: mesh.cells
   })
 }
+
+function wick (regl) {
+  var model = []
+  var mesh = build(regl, 64, function (x,y,z) {
+    return cylinder(x,y,z, 0.05,0.15)
+  })
+  return regl({
+    frag: `
+      precision mediump float;
+      ${snoise}
+      varying vec3 vpos;
+      uniform float time;
+      void main () {
+        gl_FragColor = vec4(vec3(abs(snoise(vpos*3.0)))*0.2,1);
+      }
+    `,
+    vert: `
+      precision mediump float;
+      ${snoise}
+      uniform mat4 projection, view, model;
+      uniform vec3 offset;
+      attribute vec3 position;
+      varying vec3 vpos;
+      void main () {
+        float c = snoise(position*0.5) * 4.0;
+        vpos = (position - offset) + vec3(sin(c),0,cos(c));
+        gl_Position = projection * view * model * vec4(vpos,1);
+      }
+    `,
+    attributes: {
+      position: mesh.positions
+    },
+    uniforms: {
+      model: function () {
+        mat4.identity(model)
+        mat4.scale(model, model, [2/64*0.2,2/64,2/64*0.2])
+        mat4.translate(model, model, [-32,-32,-32])
+        return model
+      },
+      offset: [0,-45,0],
+      time: regl.context('time')
+    },
+    elements: mesh.cells
+  })
+}
+
 
 function base (regl) {
   var model = []
