@@ -173,11 +173,12 @@ function candle (regl) {
       varying vec3 vnorm, vpos;
       uniform float time;
       void main () {
-        float l = clamp(0.0,1.0,pow(dot(normalize(vec3(-0.8,0.4,0.3)),vnorm),1.5)
+        float l = clamp(pow(dot(normalize(vec3(-0.8,0.4,0.3)),vnorm),1.5)
           + snoise(vpos*0.1)*0.1
           + abs(snoise(vpos*0.1+vec3(0,time*0.01,0))
             * pow(vpos.y/32.0-1.0+0.2,6.0)+1.0)*0.5*0.2
-            * (1.0 + sin(time*32.0)*0.1 + sin(time*4.0)*0.1)
+            * (1.0 + sin(time*32.0)*0.1 + sin(time*4.0)*0.1),
+          0.0, 1.0
         );
         vec3 c = vec3(l,l,l) * vec3(0.9,0.4,0.4) * 0.8;
         gl_FragColor = vec4(c,1);
