@@ -10,6 +10,11 @@ var sphereMesh = require('sphere-mesh')
 var fs = require('fs')
 var snoise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'),'utf8')
 var cnoise = fs.readFileSync(require.resolve('glsl-curl-noise/curl.glsl'),'utf8')
+var specular = ''
+  + fs.readFileSync(require.resolve('glsl-specular-beckmann/distribution.glsl'),'utf8')
+  + fs.readFileSync(require.resolve('glsl-specular-beckmann/index.glsl'),'utf8')
+    .replace(/\bdistribution\b/g, 'beckmannDistribution')
+  + fs.readFileSync(require.resolve('glsl-specular-cook-torrance/index.glsl'),'utf8')
 
 var min = Math.min, max = Math.max, abs = Math.abs, sqrt = Math.sqrt
 function dot (ax,ay,az,bx,by,bz) { return ax*bx+ay*by+az*bz }
@@ -19,6 +24,7 @@ function sign (x) { return x > 0 ? 1 : -1 }
 var camera = require('regl-camera')(regl, {
   center: [0,1,0],
   phi: 0.3,
+  theta: -1.7,
   distance: 5
 })
 
@@ -282,11 +288,17 @@ function base (regl) {
   return regl({
     frag: `
       precision mediump float;
+      ${specular}
       varying vec3 vnorm, vpos;
+      uniform vec3 eye;
       void main () {
-        float l = pow(dot(normalize(vec3(-0.8,0.4,0.3)),vnorm),8.0);
-        vec3 c = vec3(l,l,l);
-        gl_FragColor = vec4(c*vec3(1,0.6,0),1);
+        vec3 lpos = normalize(vec3(-0.8,0.4,0.6));
+        float l = pow(dot(lpos,vnorm),8.0);
+        vec3 vdir = normalize(eye - vpos);
+        vec3 ldir = normalize(lpos - vpos);
+        vec3 c = vec3(1,0.6,0)
+          * (vec3(l,l,l) + cookTorranceSpecular(ldir,vdir,vnorm,0.15,0.1));
+        gl_FragColor = vec4(c,1);
       }
     `,
     vert: `

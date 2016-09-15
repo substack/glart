@@ -6,6 +6,7 @@
     "gl-vec3": "^1.0.3",
     "glsl-curl-noise": "0.0.4",
     "glsl-noise": "0.0.0",
+    "glsl-specular-cook-torrance": "^2.0.1",
     "ndarray": "^1.0.18",
     "ndarray-fill": "^1.0.1",
     "regl": "^1.1.1",
