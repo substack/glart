@@ -2,9 +2,10 @@ var vec3 = require('gl-vec3')
 var m2mul = require('gl-mat2/multiply.js')
 
 var length = vec3.length, sub = vec3.subtract
-var abs = elwise(Math.abs), sqrt = elwise(Math.sqrt)
+var vabs = elwise(Math.abs), vsqrt = elwise(Math.sqrt)
 var vmin = vec3.min, vmax = vec3.max
 var min = Math.min, max = Math.max, sin = Math.sin, cos = Math.cos
+var abs = Math.abs
 var tau = Math.PI * 2
 
 function set (v, a, b, c) {
@@ -26,12 +27,13 @@ module.exports = geom
 function geom (x,y,z) {
   return min(
     rbox(tmpx,
-      twist(tmpm,tmpc,tau,set(tmpa,x,y,z)),
-      set(tmpb,0.2,0.6,0.2), 0.01)
-    //rbox(tmpx, twist(tmpc,20,set(tmpa,x,y,z)), set(tmpb,0.2,0.6,0.2), 0.01)
+      twist(tmpm,tmpc,tau*4,set(tmpa,x,y,z)),
+      set(tmpb,0.1,0.8,0.1), 0.01),
+    cylinder(tmpa,set(tmpb,x,y,z),set(tmpc,0.6,0.8))
   )
 }
 
+exports.twist = twist
 function twist (tmpm, tmp, a, p) {
   var c = cos(a*p[1])
   var s = sin(a*p[1])
@@ -41,8 +43,18 @@ function twist (tmpm, tmp, a, p) {
   return set(tmp, q[0], q[1], p[1])
 }
 
+exports.rbox = rbox
 function rbox (tmp, p, b, r) {
-  return length(vmax(tmp,sub(tmp,abs(tmp,p),b),z3))-r;
+  return length(vmax(tmp,sub(tmp,vabs(tmp,p),b),z3))-r;
+}
+
+exports.cylinder = cylinder
+function cylinder (tmp, p, h) {
+  set(tmp, p[0], p[2], 0)
+  var dx = abs(length(tmp)) - h[0]
+  var dy = abs(p[1]) - h[1]
+  set(tmp, dx, dy, 0)
+  return min(max(dx,dy),0) + length(vmax(tmp, tmp, z3))
 }
 
 function elwise (f) {

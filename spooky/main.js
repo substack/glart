@@ -20,7 +20,7 @@ regl.frame(() => {
 
 function castle (regl) {
   var model = []
-  var mesh = build(64, geo)
+  var mesh = build([64,250,64], geo)
   return regl({
     frag: `
       precision mediump float;
@@ -49,6 +49,7 @@ function castle (regl) {
     uniforms: {
       model: () => {
         mat4.identity(model)
+        mat4.scale(model,model,[1,4,1])
         return model
       }
     },
