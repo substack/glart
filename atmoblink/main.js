@@ -5,7 +5,8 @@ var regl = require('regl')({
 })
 var d = 2
 var camera = require('regl-camera')(regl, {
-  minDistance: d, distance: d, maxDistance: d
+  minDistance: d, distance: d, maxDistance: d,
+  mouse: false
 })
 var icosphere = require('icosphere')
 var mat4 = require('gl-mat4')
