@@ -6,13 +6,24 @@ var glx = require('glslify')
 
 var regl = require('regl')()
 var camera = require('regl-camera')(regl, {
-  center: [0,0,0],
-  eye: [0,0,-1],
-  distance: 300
+  phi: 0.25,
+  theta: 0.5,
+  distance: 400
 })
 var mat4 = require('gl-mat4')
 var normals = require('angle-normals')
 var bg = require('./bg.js')
+
+var state = { distance: 0, offset: 0 }
+var time = 0
+window.addEventListener('keydown', function (ev) {
+  if (ev.keyCode === 0x20) { // space bar
+    state.distance = Math.max(1000, state.distance + 200)
+    state.offset = time
+  } else if (ev.keyCode === 0x25) { // left
+  } else if (ev.keyCode === 0x27) { // right
+  }
+})
 
 var draw = {
   base: base(),
@@ -21,12 +32,18 @@ var draw = {
   bg: bg(regl)
 }
 regl.frame(function () {
+  regl.clear({ color: [0,0,0,1], depth: true })
   camera(function () {
-    regl.clear({ color: [0,0,0,1], depth: true })
-    draw.bg()
-    draw.base()
-    draw.top()
-    draw.eye()
+    regl.draw(function (context) {
+      var n = Math.sin(context.time - state.offset)
+      var d = Math.pow(n,3)*state.distance
+      state.distance *= 0.95
+      time = context.time
+      draw.bg()
+      draw.base({ distance: d })
+      draw.top({ distance: d })
+      draw.eye({ distance: d })
+    })
   })
 })
 
@@ -116,8 +133,9 @@ function top () {
       position: positions
     },
     uniforms: {
-      model: function () {
+      model: function (context) {
         mat4.identity(model)
+        mat4.rotateY(model, model, context.time)
         return model
       }
     },
@@ -158,10 +176,12 @@ function base () {
           + pow(abs(sin((abs(pos.z*0.5)+dy)*0.25)),1600.0)
           + pow(abs(sin((abs(pos.x*1.0))*0.5)),400.0)
           + pow(abs(sin((abs(pos.z*1.0))*0.5)),400.0)
-        )) + abs(sin(snoise(vec3(
+        ));
+        vec3 r = abs(sin(snoise(vec3(
           pos.x/32.0, pos.y/32.0-time*0.2, pos.z/32.0
-        ))))*vec3(0,0.5,0.8);
-        gl_FragColor = vec4(v,1);
+        ))))*vec3(0.4,0.1,0.4);
+        r += vec3(1,0,1) * (1.0-length(v)) * 0.1;
+        gl_FragColor = vec4(v+r,1);
       }
     `,
     vert: `
@@ -181,8 +201,10 @@ function base () {
     },
     elements: cells,
     uniforms: {
-      model: function (context) {
+      model: function (context, props) {
         mat4.identity(model)
+        mat4.rotateY(model, model, -context.time)
+        mat4.translate(model, model, [0,0,props.distance])
         return model
       },
       time: function (context) { return context.time }
