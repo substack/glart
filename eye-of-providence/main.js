@@ -2,8 +2,7 @@ var surfaceNets = require('surface-nets')
 var ndarray = require('ndarray')
 var fill = require('ndarray-fill')
 var sphere = require('sphere-mesh')
-var fs = require('fs')
-var noise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'))
+var glx = require('glslify')
 
 var regl = require('regl')()
 var camera = require('regl-camera')(regl, {
@@ -147,11 +146,11 @@ function base () {
   ]
   var model = []
   return regl({
-    frag: `
+    frag: glx`
       precision mediump float;
+      #pragma glslify: snoise = require('glsl-noise/simplex/3d')
       varying vec3 norm, pos;
       uniform float time;
-      ${noise}
       void main () {
         float dy = step(0.5,mod(pos.y/32.0,1.0)) * 3.0;
         vec3 v = (vec3(0,0.5,1) * (0.0

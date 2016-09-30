@@ -1,14 +1,13 @@
-var fs = require('fs')
-var noise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'))
+var glx = require('glslify')
 var mat4 = require('gl-mat4')
 
 module.exports = function (regl) {
   var iview = [], iproj = []
   return regl({
-    frag: `
+    frag: glx`
       precision mediump float;
+      #pragma glslify: snoise = require('glsl-noise/simplex/3d')
       varying vec3 e, z;
-      ${noise}
       void main () {
         float m = 0.0
           + pow(snoise(z*64.0),16.0)
