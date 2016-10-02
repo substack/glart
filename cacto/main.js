@@ -3,7 +3,7 @@ var vec3 = require('gl-vec3')
 var normals = require('angle-normals')
 var regl = require('regl')()
 var camera = require('regl-camera')(regl, {
-  minDistance: 2, maxDistance: 20, distance: 5
+  minDistance: 2, maxDistance: 20, distance: 10
 })
 var build = require('implicit-mesh/shader')
 var glx = require('glslify')
