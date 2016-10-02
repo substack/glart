@@ -13,7 +13,7 @@ var mat4 = require('gl-mat4')
 var fs = require('fs')
 var atmo = fs.readFileSync(require.resolve('glsl-atmosphere/index.glsl'),'utf8')
 
-require('./sfx.js')(regl)
+//require('./sfx.js')(regl)
 
 var draw = { planet: planet(regl) }
 regl.frame(function () {

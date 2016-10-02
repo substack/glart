@@ -20,8 +20,6 @@ window.addEventListener('keydown', function (ev) {
   if (ev.keyCode === 0x20) { // space bar
     state.distance = Math.max(1000, state.distance + 200)
     state.offset = time
-  } else if (ev.keyCode === 0x25) { // left
-  } else if (ev.keyCode === 0x27) { // right
   }
 })
 

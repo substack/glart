@@ -5,10 +5,12 @@
   "main": "main.js",
   "dependencies": {
     "angle-normals": "^1.0.0",
-    "brfs": "^1.4.3",
     "gl-mat2": "^1.0.0",
     "gl-mat4": "^1.1.4",
     "gl-vec3": "^1.0.3",
+    "glsl-curl-noise": "0.0.4",
+    "glsl-noise": "0.0.0",
+    "glslify": "^6.0.0",
     "implicit-mesh": "^1.0.0",
     "ndarray": "^1.0.18",
     "ndarray-fill": "^1.0.1",
@@ -19,7 +21,7 @@
   "devDependencies": {},
   "browserify": {
     "transform": [
-      "brfs"
+      "glslify"
     ]
   },
   "scripts": {

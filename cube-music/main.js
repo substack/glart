@@ -1,9 +1,9 @@
 var regl = require('regl')()
 var mat4 = require('gl-mat4')
 var cubeMesh = require('cube-mesh')
-var webaudio = require('webaudio')
 var mesh = cubeMesh(1)
-
+/*
+var webaudio = require('webaudio')
 var song = require('./song.js')
 var time = 0
 var b = webaudio(function (t) {
@@ -11,6 +11,7 @@ var b = webaudio(function (t) {
   return song(t)
 })
 b.play()
+*/
 
 var cubes0 = []
 for (var i = 0; i < 80; i++) cubes0.push(createCube())
@@ -34,7 +35,7 @@ regl.frame(function (count) {
     proj: mat4.perspective(proj, Math.PI/2,
       window.innerWidth/window.innerHeight, 0, 1e12)
   }
-  var cubes = time * bpm % 2 < 1 ? cubes0 : cubes1
+  var cubes = count.time * bpm % 2 < 1 ? cubes0 : cubes1
   for (var i = 0; i < cubes.length; i++) cubes[i](count, opts)
 })
 
@@ -93,14 +94,14 @@ function createCube () {
   return function (count, opts) {
     camera(mat4.identity(model))
     // orbit:
-    mat4.rotateX(model, model, orbitx*count)
-    mat4.rotateY(model, model, orbity*count)
+    mat4.rotateX(model, model, orbitx*count.time)
+    mat4.rotateY(model, model, orbity*count.time)
 
     mat4.translate(model, model, pos)
 
     mat4.identity(view)
-    mat4.rotateX(view, view, rotx*count)
-    mat4.rotateY(view, view, roty*count)
+    mat4.rotateX(view, view, rotx*count.time)
+    mat4.rotateY(view, view, roty*count.time)
 
     opts.model = model
     opts.view = view
