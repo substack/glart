@@ -48,7 +48,7 @@ function sky (regl) {
       varying vec2 uv;
       uniform float time;
       void main () {
-        float x = pow(snoise(vec3(uv*12.0,time*0.5)),0.25);
+        float x = pow(abs(snoise(vec3(uv*12.0,time*0.5))),0.25);
         vec3 c = vec3(x,x*0.2,x);
         gl_FragColor = vec4(c,1);
       }
@@ -107,7 +107,7 @@ function spiralstick (regl) {
         void main () {
           float l = max(dot(vec3(0.2,1,-0.3),vnorm)*0.8,
             dot(vec3(-0.3,-1,-0.2),vnorm)*0.05)
-            + 0.5*pow(snoise(vpos*8.0+vec3(0,time*1.0,0)),0.2)-0.25;
+            + 0.5*pow(abs(snoise(vpos*8.0+vec3(0,time*1.0,0))),0.2)-0.25;
           gl_FragColor = vec4(l*0.5,l,l*0.25,1);
         }
       `,

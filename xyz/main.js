@@ -27,9 +27,10 @@ function cool (regl) {
       uniform float time;
       void main () {
         vec3 vnorm = normalize(vpos);
-        float l = pow(abs(snoise(vec4(vpos,time*0.2))),4.0)*1.0+0.7;
+        float l = pow(abs(snoise(vec4(vpos,time*0.2))),0.25)
+          *0.35+0.6;
         vec3 c = hsl(l,1.0,l*0.8);
-        gl_FragColor = vec4(c,1);
+        gl_FragColor = vec4(pow(c,vec3(2.2)),1);
       }
     `,
     vert: glx`
