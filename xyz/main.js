@@ -33,13 +33,13 @@ function feedback (regl) {
       void main () {
         float d = 0.001;
         vec3 c = texture2D(texture,uv).rgb;
-        const int n = 4;
+        const int n = 8;
         for (int i = 0; i < n; i++) {
           c += texture2D(texture,uv+vec2(d,d)).rgb;
           c += texture2D(texture,uv+vec2(-d,d)).rgb;
           c += texture2D(texture,uv+vec2(d,-d)).rgb;
           c += texture2D(texture,uv+vec2(-d,-d)).rgb;
-          d *= 2.0;
+          d *= 1.6;
         }
         gl_FragColor = vec4(c*0.9/(1.0+float(n)*4.0),1);
       }
@@ -84,9 +84,8 @@ function blob (regl) {
       uniform float time;
       void main () {
         vec3 vnorm = normalize(vpos);
-        float l = pow(abs(snoise(vec4(vpos,time*0.2))),0.25)
-          *0.35+0.6;
-        vec3 c = hsl(l,1.0,l*0.8);
+        float l = pow(abs(snoise(vec4(vpos,time*0.2))),0.5)*0.5+0.5;
+        vec3 c = hsl(0.9,l,0.5);
         gl_FragColor = vec4(pow(c,vec3(2.2)),1);
       }
     `,
