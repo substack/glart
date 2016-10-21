@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "angle-normals": "^1.0.0",
+    "gl-vec3": "^1.0.3",
+    "glsl-atmosphere": "^2.0.0",
+    "glsl-colormap": "^1.0.1",
+    "glsl-noise": "0.0.0",
+    "glslify": "^6.0.1",
+    "icosphere": "^1.0.0",
+    "parse-ply": "^0.1.0",
+    "parse-wavefront-obj": "^1.0.3",
+    "regl": "^1.2.1",
+    "regl-camera": "^1.1.0",
+    "regl-feedback": "^1.0.0",
+    "resl": "^1.0.3",
+    "wavefront-obj-parser": "^0.3.0"
+  },
+  "browserify": {
+    "transform": [
+      "glslify"
+    ]
+  }
+}
