@@ -1,13 +1,19 @@
 var regl = require('regl')()
 var camera = require('regl-camera')(regl, {
-  theta: Math.PI/2, phi: 0.5, distance: 20
+  theta: Math.PI/4, phi: 0.8, distance: 20
 })
 var cube = require('cube-mesh')
 var normalize = require('gl-vec3/normalize')
 var anormals = require('angle-normals')
-var resl = require('resl')
 var smooth = require('smooth-state')
 var mat4 = require('gl-mat4')
+var feedback = require('regl-feedback')
+var drawfb = feedback(regl, `
+  vec3 sample (vec2 uv, sampler2D tex) {
+    return 0.7*texture2D(tex, (0.99*(2.0*uv-1.0)+1.0)*0.5).rgb;
+  }
+`)
+var fbtex = regl.texture()
 
 var lights = (function () {
   return regl({
@@ -51,11 +57,8 @@ var state = smooth(init)
 
 regl.frame(function (context) {
   var t = time = context.time
-  if (t >= next) {
-    update()
-    next = t + 4
-  }
   regl.clear({ color: [0,0,0,1], depth: true })
+  drawfb({ texture: fbtex })
   lights(function () {
     camera(function () {
       for (var i = 0; i < n; i++) {
@@ -65,6 +68,11 @@ regl.frame(function (context) {
       draw.box(props)
     })
   })
+  fbtex({ copy: true, min: 'linear', mag: 'linear' })
+  if (t >= next) {
+    update()
+    next = t + 4
+  }
 })
 
 function xsin (x,n) {
@@ -85,13 +93,15 @@ function box (regl) {
       void main () {
         vec3 N = normalize(vnorm);
         vec3 d0 = dot(-normalize(light0-vpos),N)
-          *vec3(0,0.5,1)*xsin(time*0.5+floor(
-            (xsin(vpos.x,4.0)+xsin(vpos.y,8.0)+xsin(vpos.z,2.0))/3.0),4.0);
+          * vec3(0,1,1)
+          * xsin(time*0.2+floor(
+            (xsin(vpos.x,4.0)+xsin(vpos.y,8.0)+xsin(vpos.z,2.0))/3.0),8.0);
         vec3 d1 = dot(-normalize(light1-vpos),N)
-          *vec3(1,0.5,0)*xsin(time*0.1+xsin(vpos.x,2.0)+xsin(vpos.y,4.0)+xsin(vpos.z,3.0),4.0);
+          * vec3(1,0,1)
+          * xsin(time*0.1+xsin(vpos.x,2.0)+xsin(vpos.y,4.0)+xsin(vpos.z,3.0),4.0);
         vec3 d2 = dot(-normalize(light2-vpos),N)
-          *vec3(0,1,0.5)*xsin(time,8.0);
-        gl_FragColor = vec4(abs((d0+d1+d2))/2.0,1);
+          *vec3(0.5,0,0.2)*xsin(time*0.3,8.0);
+        gl_FragColor = vec4(pow(abs((d0+d1+d2)),vec3(2.2)),1);
       }
     `,
     vert: `
@@ -107,13 +117,13 @@ function box (regl) {
       void main () {
         vnorm = normal;
         vec3 dpos = (xmat*vec4(position,1)).xyz;
+        float xf = xsin(0.0
+          + xsin(dpos.x*4.0+time*2.0,4.0)
+          + xsin(dpos.y*4.0+time*2.0,4.0)
+          + xsin(dpos.z*2.0+time*1.0,2.0),
+          2.0);
         vpos = clamp(position,vec3(-1,-1,-1),vec3(1,1,1))
-          + abs(0.1*normal*xsin(0.0
-            + xsin(dpos.x*4.0+time*2.0,4.0)
-            + xsin(dpos.y*4.0+time*2.0,4.0)
-            + xsin(dpos.z*2.0+time*1.0,2.0),
-            2.0
-          ))*2.0 + location*vec3(2.3);
+          + abs(0.1*normal*xf)*xsin(time*0.1+xf,4.0)*4.0 + location*vec3(2.5);
         gl_Position = projection * view * vec4(vpos,1);
       }
     `,
