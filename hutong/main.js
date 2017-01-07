@@ -9,6 +9,27 @@ var draw = {
   sign: sign(regl),
   building: building(regl)
 }
+var buildings = [
+  { location: [7,3,-16], scale: [20,10,20] },
+  { location: [-12,3,10], scale: [20,10,20] }
+]
+for (var x = -150; x < 0; x += (2+nsin(x,4))*20) {
+  for (var z = -100; z < 100; z += (2+nsin(z,4))*20.5) {
+    if (Math.sqrt(x*x+z*z)<50) continue
+    var h = (2+nsin(x*0.23+z*0.31,8))*Math.sqrt(x*x+z*z)*0.4
+    buildings.push({
+      location: [x,h*0.5-2,z],
+      scale: [
+        (2+nsin(x*0.3+z*0.2,3))*10,
+        h,
+        (2+nsin(x*0.17+z*0.31,3))*10
+      ]
+    })
+  }
+}
+
+function nsin (x,n) { return Math.floor(Math.sin(x)*n)/n }
+
 regl.frame(function () {
   camera(function () {
     regl.clear({ color: [0,0,0,1], depth: true })
@@ -17,10 +38,7 @@ regl.frame(function () {
       { location: [1.2,2,2], scale: [0.02,2,1], color: [0.8,1,0.2] },
       { location: [-2.2,3,-6], scale: [1,1.5,0.02], color: [1,0.5,0] }
     ])
-    draw.building([
-      { location: [7,3,-16], scale: [20,10,20] },
-      { location: [-12,3,10], scale: [20,10,20] }
-    ])
+    draw.building(buildings)
   })
 })
 
@@ -31,12 +49,13 @@ function building (regl) {
       precision mediump float;
       varying vec3 vpos;
       uniform float time;
-      uniform vec3 location;
+      uniform vec3 eye, location;
       float nsin (float x, float n) {
         return floor(sin(x)*n)/n;
       }
       void main () {
-        gl_FragColor = vec4(vec3(0.2),1);
+        vec3 color = vec3(min(1.0,length(location)/70.0-0.5));
+        gl_FragColor = vec4(color,1);
       }
     `,
     vert: `
