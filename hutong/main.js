@@ -18,7 +18,7 @@ for (var x = -150; x < 0; x += (2+nsin(x,4))*20) {
     if (Math.sqrt(x*x+z*z)<50) continue
     var h = (2+nsin(x*0.23+z*0.31,8))*Math.sqrt(x*x+z*z)*0.4
     buildings.push({
-      location: [x,h*0.5-2,z],
+      location: [x,h*0.5-5,z],
       scale: [
         (2+nsin(x*0.3+z*0.2,3))*10,
         h,
@@ -54,8 +54,18 @@ function building (regl) {
         return floor(sin(x)*n)/n;
       }
       void main () {
-        vec3 color = vec3(min(1.0,length(location)/70.0-0.5));
-        gl_FragColor = vec4(color,1);
+        float mask = clamp(0.0,1.0,length(location)/70.0-0.5);
+        vec3 v = vpos+location;
+        float light = nsin(v.y*4.0,4.0)
+          * (1.0+nsin(nsin(v.x*1.0,2.0)*7.0+nsin(v.z*8.0,3.0)*6.0,2.0))
+          * (1.0+nsin(nsin(v.x*v.x*0.01+v.z*4.2,2.0)*2.0
+            + nsin(v.x*1.7+v.z*2.0,2.0)*2.0,4.0))
+          * (1.0+nsin(v.y*2.0+nsin(v.y*4.0,2.0)*0.7,3.0))
+          * (1.0+nsin(v.y*2.0+v.y*0.7*sin(v.y*0.3+location.x)*0.2,8.0))
+        ;
+        float r = 1.0+nsin(time*1.0+nsin(v.x,2.0)+nsin(v.y,2.1)+nsin(v.z,1.9),4.0);
+        vec3 c0 = vec3(0.5+r*0.5,1,1)*light;
+        gl_FragColor = vec4(c0*mask,1);
       }
     `,
     vert: `
@@ -68,15 +78,17 @@ function building (regl) {
         return floor(sin(x)*n)/n;
       }
       void main () {
+        float d = step(0.1,1.0-length(location)/50.0);
         vpos = clamp(vec3(-0.5),vec3(0.5),position)*scale+location
-          + normal*nsin(position.x*3.0+position.y*4.0+position.z*3.2,2.0);
+          + d*normal*nsin(position.x*3.0+position.y*4.0+position.z*3.2,2.0);
         vnorm = normal;
         gl_Position = projection * view * vec4(vpos,1);
       }
     `,
     uniforms: {
       location: regl.prop('location'),
-      scale: regl.prop('scale')
+      scale: regl.prop('scale'),
+      time: regl.context('time')
     },
     attributes: {
       position: mesh.positions,
