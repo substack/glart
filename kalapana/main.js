@@ -6,10 +6,13 @@ var glsl = require('glslify')
 var anormals = require('angle-normals')
 var icosphere = require('icosphere')
 var grid = require('grid-mesh')
+var ico3 = icosphere(3)
+
 var draw = {
   lava: lava(regl),
   water: water(regl),
-  rocks: rocks(regl)
+  rocks: rocks(regl),
+  plume: plume(regl)
 }
 regl.frame(function () {
   regl.clear({ color: [0,0,0,1], depth: true })
@@ -17,33 +20,79 @@ regl.frame(function () {
     draw.lava()
     draw.water()
     draw.rocks()
+    draw.plume()
   })
 })
+
+function plume (regl) {
+  var size = 10
+  var mesh = grid(size,size,[-1,-1],[2/size,0],[0,2/size])
+  return regl({
+    frag: glsl`
+      precision mediump float;
+      #pragma glslify: snoise = require('glsl-noise/simplex/4d')
+      uniform float time;
+      varying vec3 vpos;
+      void main () {
+        float cl = clamp(0.0,1.0,
+          (4.0*max(0.0,(vpos.y+13.0)*0.1)-abs(vpos.x+vpos.y+0.0))*0.1);
+        float d0 = max(0.0,snoise(vec4(vpos*0.2+vec3(0,-time*0.2,0),time*0.05)));
+        float d1 = max(0.0,snoise(vec4(vpos*0.1+vec3(0,-time*0.2,0),time*0.05)));
+        vec3 c = vec3(1,0.5,0);
+        gl_FragColor = vec4(c,(d0+d1)*cl*0.1);
+      }
+    `,
+    vert: `
+      precision mediump float;
+      uniform mat4 projection, view;
+      attribute vec2 position;
+      varying vec3 vpos;
+      uniform float size;
+      uniform vec3 offset;
+      void main () {
+        vpos = vec3(position*40.0,-position.x*40.0)
+          + vec3(-10,32,16);
+        gl_Position = projection * view * vec4(vpos,1);
+      }
+    `,
+    attributes: {
+      position: mesh.positions
+    },
+    uniforms: {
+      time: regl.context('time')
+    },
+    elements: mesh.cells,
+    blend: {
+      enable: true,
+      func: { src: 'src alpha', dst: 'one minus src alpha' }
+    }
+  })
+}
 
 function rocks (regl) {
   var size = 40
   var mesh = grid(size,size,[-1,-1],[2/size,0],[0,2/size])
   return regl({
     frag: glsl`
-      precision highp float;
+      precision mediump float;
       #pragma glslify: snoise = require('glsl-noise/simplex/3d')
       varying vec3 vpos;
       void main () {
-        float d = max(0.0,8.0-length(vpos-vec3(0,8,0)));
+        float d = max(0.0,8.0-length(vpos-vec3(0,2,0)));
         d += snoise(vpos*1.0)*2.0 * pow(d*0.4,2.2);
         d += snoise(vpos*4.0)*1.0;
-        vec3 c = vec3(1,0.5,0)*pow(d*0.1,2.2);
+        vec3 c = vec3(1,0.5,0)*pow(d*0.02,2.2);
         gl_FragColor = vec4(c,1);
       }
     `,
     vert: glsl`
-      precision highp float;
+      precision mediump float;
       #pragma glslify: snoise = require('glsl-noise/simplex/3d')
       uniform mat4 projection, view;
       attribute vec2 position;
       varying vec3 vpos;
       void main () {
-        vpos = vec3(position*vec2(20,8),2.5-sin(position.x*2.0)*2.0) - vec3(7,4,0)
+        vpos = vec3(position*vec2(20,10),2.5-sin(position.x*2.0)*2.0) - vec3(7,4,0)
           + snoise(vec3(position*2.0,0.5))*0.5
           + snoise(vec3(position*4.0,0.5))*0.25
           + snoise(vec3(position*0.5,3))*2.0;
@@ -63,7 +112,7 @@ function water (regl) {
   var mesh = grid(size,size,[-1,-1],[2/size,0],[0,2/size])
   return regl({
     frag: glsl`
-      precision highp float;
+      precision mediump float;
       #pragma glslify: snoise = require('glsl-noise/simplex/4d')
       uniform float time;
       varying vec3 vpos;
@@ -75,7 +124,7 @@ function water (regl) {
       }
     `,
     vert: glsl`
-      precision highp float;
+      precision mediump float;
       #pragma glslify: snoise = require('glsl-noise/simplex/4d')
       uniform mat4 projection, view;
       uniform float time;
@@ -99,10 +148,10 @@ function water (regl) {
 }
 
 function lava (regl) {
-  var mesh = icosphere(3)
+  var mesh = ico3
   return regl({
     frag: glsl`
-      precision highp float;
+      precision mediump float;
       #pragma glslify: snoise = require('glsl-noise/simplex/4d')
       varying vec3 vnorm, vpos;
       uniform float time;
@@ -115,7 +164,7 @@ function lava (regl) {
       }
     `,
     vert: glsl`
-      precision highp float;
+      precision mediump float;
       #pragma glslify: snoise = require('glsl-noise/simplex/4d')
       uniform mat4 projection, view;
       uniform float time;
