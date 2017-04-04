@@ -5,5 +5,12 @@
     "glslify": "^6.0.2",
     "regl": "^1.3.0",
     "regl-camera": "^1.1.0"
+  },
+  "scripts": {
+    "build": "browserify main.js | indexhtmlify > birds.html",
+    "dev": "budo main.js"
+  },
+  "browserify": {
+    "transform": ["glslify"]
   }
 }
